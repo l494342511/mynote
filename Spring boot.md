@@ -8,7 +8,21 @@
 
 ![image-20210119133544011](Spring boot.assets/image-20210119133544011.png)
 
-### 2.1 管理依赖版本的地方
+### 2.1 自动装配实现机制
+
+**依赖管理**
+
+```xml
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-dependencies</artifactId>
+    <version>2.4.2</version>
+  </parent>
+```
+
+有了这个父依赖，以后**导入依赖默认是不需要写版本**；但是如果导入的包没有在依赖中管理就需要重新配置版本了。
+
+**配置yml的地方**
 
 ```xml
 <parent>
@@ -18,8 +32,6 @@
     <relativePath/> <!-- lookup parent from repository -->
 </parent>
 ```
-
-有了这个父依赖，以后**导入依赖默认是不需要写版本**；但是如果导入的包没有在依赖中管理就需要重新配置版本了。
 
 ### 2.2 启动器
 
@@ -48,6 +60,80 @@ public class SpringBoot01Application {
     }
 }
 ```
+
+该类必须和controller在一个包下才能扫描到controller
+
+**注解**
+
+```java
+@SpringBootApplication
+	@SpringBootConfiguration：spring boot的配置
+		@Configuration：说明是一个spring配置类
+		@Component：说明是一个spring的组件
+	@EnableAutoConfiguration：自动配置
+		@AutoConfigurationPackage：自动配置包
+			Import(AutoConfigurationPackages.Registrar.class)：自动配置`包注册`
+		@Import(AutoConfigurationImportSelector.class)
+			getAutoConfigurationEntry(annotationMetadata)：获得在自动配置的实体
+			getCandidateConfigurations(annotationMetadata, attributes)：获取候选的配置
+				//从标注了@EnableAutoConfiguration的类中获取
+				protected Class<?> getSpringFactoriesLoaderFactoryClass() {return EnableAutoConfiguration.class;}
+					Enumeration<URL> urls = classLoader.getResources(FACTORIES_RESOURCE_LOCATION);//项目资源
+						public static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factories";//从这获取配置
+							@ConditionalOnXXX//核心注解，只有导入了相应的start配置才会起作用
+					Properties properties = PropertiesLoaderUtils.loadProperties(resource);//封装成properties供使用
+```
+
+主启动类会从spring.factories获取配置，spring.factories中有很多xxxAutoConfiguration类，这些类一旦生效就会为容器添加很多组件
+
+一个AutoConfiguration类
+
+```java
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnClass({ DispatcherHandler.class, HttpHandler.class })
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+@ConditionalOnMissingBean(HttpHandler.class)
+@AutoConfigureAfter({ WebFluxAutoConfiguration.class })
+@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE + 10)
+public class HttpHandlerAutoConfiguration {
+
+   @Configuration(proxyBeanMethods = false)
+   public static class AnnotationConfig {
+
+      private final ApplicationContext applicationContext;
+
+      public AnnotationConfig(ApplicationContext applicationContext) {
+         this.applicationContext = applicationContext;
+      }
+
+      @Bean
+      public HttpHandler httpHandler(ObjectProvider<WebFluxProperties> propsProvider) {
+         HttpHandler httpHandler = WebHttpHandlerBuilder.applicationContext(this.applicationContext).build();
+         WebFluxProperties properties = propsProvider.getIfAvailable();
+         if (properties != null && StringUtils.hasText(properties.getBasePath())) {
+            Map<String, HttpHandler> handlersMap = Collections.singletonMap(properties.getBasePath(), httpHandler);
+            return new ContextPathCompositeHandler(handlersMap);
+         }
+         return httpHandler;
+      }
+
+   }
+
+}
+```
+
+AutoConfiguration类通过properties获取配置属性。该类对应的properties如下
+
+```java
+@ConfigurationProperties(prefix = "spring.webflux")
+public class WebFluxProperties {
+   private String basePath;
+   private final Format format = new Format();
+   //
+}
+```
+
+该properties与主配置文件中的spring.webflux前缀绑定，可以在主配置文件中对这些属性进行配置，不配置的时候使用默认值
 
 #### 2.3.2 @SpringBootApplication
 
@@ -305,3 +391,39 @@ spring:
 优先级4：资源路径下配置文件
 ```
 
+## 5. 读源码
+
+@Configuration：表示是一个配置类
+
+@EnableConfigurationProperties：自动配置属性，指定 要配哪一个类
+
+@ConfigurationProperties：绑定属性
+
+```java
+//spring的底层注解：根据不同的条件，来判断当前配置或者类是否生效
+@ConditionalOnWebApplication
+@ConditionalOnClass
+@ConditionalOnProperties
+```
+
+## 6. spring-boot web应用
+
+### 6.1 项目结构
+
+![image-20210122164124185](Spring boot.assets/image-20210122164124185.png)
+
+启动器应该和controller在一个包下，才能扫描到controller
+
+### 6.2 访问web资源的方式
+
+1. 通过webjars目录
+
+   ![image-20210122165345129](Spring boot.assets/image-20210122165345129.png)
+
+2. 静态路径
+
+   ![image-20210122171453033](Spring boot.assets/image-20210122171453033.png)
+
+   使用localhost:8080/**.js 会自动去这几个目录下找相应的js文件访问
+
+   静态路径的优先级：resources>static>public
