@@ -427,3 +427,290 @@ spring:
    使用localhost:8080/**.js 会自动去这几个目录下找相应的js文件访问
 
    静态路径的优先级：resources>static>public
+
+### 6.3 首页
+
+1. 首页的html放在三个静态资源包下，命名为index，通过localhost:8080即可访问
+
+2. 通过模板引擎thymeleaf访问
+
+   引入依赖：
+
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-thymeleaf</artifactId>
+   </dependency>
+   ```
+
+   该依赖等于
+
+   ```xml
+   <dependency>
+     <groupId>org.springframework.boot</groupId>
+     <artifactId>spring-boot-starter</artifactId>
+     <version>2.4.2</version>
+     <scope>compile</scope>
+   </dependency>
+   <dependency>
+     <groupId>org.thymeleaf</groupId>
+     <artifactId>thymeleaf-spring5</artifactId>
+     <version>3.0.12.RELEASE</version>
+     <scope>compile</scope>
+   </dependency>
+   <dependency>
+     <groupId>org.thymeleaf.extras</groupId>
+     <artifactId>thymeleaf-extras-java8time</artifactId>
+     <version>3.0.4.RELEASE</version>
+     <scope>compile</scope>
+   </dependency>
+   ```
+
+   将首页放于templates下，通过接口访问
+
+   ![image-20210123154426985](Spring boot.assets/image-20210123154426985.png)
+
+   ![image-20210123154032514](Spring boot.assets/image-20210123154032514.png)
+
+## 7. spring boot 数据库的使用
+
+### 7.1 使用Template使用JDBC
+
+**引入依赖**
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jdbc</artifactId>
+</dependency>
+```
+
+**配置DataSource**
+
+```yml
+spring:
+  datasource:
+    username: root
+    password: 666
+    url: jdbc:mysql://localhost:3306/nuclear?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+```
+
+mysql8需要设定时区
+
+mysql8使用新的驱动：com.mysql.cj.jdbc.Driver
+
+**使用**
+
+```java
+@Autowired
+JdbcTemplate jdbcTemplate;
+
+@GetMapping("/hello")
+public List<Map<String,Object>> userList(){
+    String sql = "select * from testname";
+    List<Map<String,Object>> userList = jdbcTemplate.queryForList(sql);
+    return userList;
+}
+```
+
+### 7.2 使用Druid连接池
+
+**引入依赖**
+
+```xml
+<dependency>
+    <groupId>com.alibaba</groupId>
+    <artifactId>druid</artifactId>
+    <version>1.2.4</version>
+</dependency>
+```
+
+**配置连接池属性**
+
+```yml
+spring:
+  datasource:
+    username: root
+    password: 666
+    url: jdbc:mysql://localhost:3306/nuclear?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+
+    #spring boot 默认不注入这些属性值，需要自己绑定
+    #druid 数据源专有配置
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMills: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+
+    #配置监控统计拦截filters, stat：监控统计、log4j
+    filters: stat,wall,log4j
+    maxPoolPreparedStatementPerConnectionSize: 20
+    useGlobalDataSourceStat: true
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+```
+
+**管理Druid连接池**
+
+Druid的私有属性不被spring boot管理，需要手动配置bean
+
+```java
+@Configuration
+public class DruidConfig {
+
+    @ConfigurationProperties(prefix = "spring.datasource")
+    @Bean
+    public DataSource druidDataSource(){
+        return new DruidDataSource();
+    }
+    
+}
+```
+
+**配置后台监控和过滤器**
+
+```java
+//    后台监控
+    @Bean
+    public ServletRegistrationBean statViewServlet(){
+        ServletRegistrationBean<StatViewServlet> statViewServletServletRegistrationBean = new ServletRegistrationBean<>(new StatViewServlet(),"/druid/*");
+        HashMap<String,String> initPara = new HashMap<>();//后台账号密码设置
+        initPara.put("loginUsername","root");
+        initPara.put("loginPassword","123456");
+        initPara.put("allow","");//允许用户列表
+        statViewServletServletRegistrationBean.setInitParameters(initPara);//设置初始化参数
+        return statViewServletServletRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean webStatFilter(){
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new WebStatFilter());
+        Map<String,String> initPara = new HashMap<>();
+        //这些东西不进行统计
+        initPara.put("exclusion","*.js,*.css,/druid/*");
+        filterRegistrationBean.setInitParameters(initPara);
+        return filterRegistrationBean;
+    }
+```
+
+**通过/druid访问后台**
+
+![image-20210124163456349](Spring boot.assets/image-20210124163456349.png)
+
+### 7.3 spring-boot整合mybatis
+
+添加依赖
+
+```xml
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <version>2.1.4</version>
+</dependency>
+```
+
+等同于
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jdbc</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-autoconfigure</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis-spring</artifactId>
+  </dependency>
+</dependencies>
+```
+
+**创建mapper类**
+
+```java
+@Mapper
+@Repository
+public interface UserMapper {
+
+}
+```
+
+可以通过@Mapper指定该类为mapper类
+
+@Repository指定该类为spring的一个组件
+
+也可以通过@MapperScan()让主启动类扫描mapper
+
+```java
+@SpringBootTest
+@MapperScan("com.ljq.mapper")
+class SpringBootMybatis01ApplicationTests {
+}
+```
+
+**创建对应的mapper.xml**
+
+命名空间要指定
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ljq.mapper.UserMapper">
+
+</mapper>
+```
+
+**配置mapper与mapper.xml的匹配**
+
+type-aliases-package：指定mapper.xml的实体包，如com.ljq.pojo.user=user
+
+```yml
+spring:
+  datasource:
+    username: root
+    password: 666
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mytestdb?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+mybatis:
+  type-aliases-package: com.ljq.pojo
+  mapper-locations: classpath:mybatis/mapper/*.xml
+```
+
+**使用**
+
+```java
+@RestController
+public class UserController {
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @GetMapping("/query")
+    public List<Users> queryUserList(){
+        return userMapper.queryUserList();
+    }
+}
+```
+

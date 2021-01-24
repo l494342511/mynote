@@ -153,3 +153,111 @@ public class booksDAOImpl implements booksDAO {
 }
 ```
 
+### 1.3 spring-boot整合mybatis
+
+添加依赖
+
+```xml
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <version>2.1.4</version>
+</dependency>
+```
+
+等同于
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jdbc</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-autoconfigure</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis</artifactId>
+  </dependency>
+  <dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis-spring</artifactId>
+  </dependency>
+</dependencies>
+```
+
+**创建mapper类**
+
+```java
+@Mapper
+@Repository
+public interface UserMapper {
+
+}
+```
+
+可以通过@Mapper指定该类为mapper类
+
+@Repository指定该类为spring的一个组件
+
+也可以通过@MapperScan()让主启动类扫描mapper
+
+```java
+@SpringBootTest
+@MapperScan("com.ljq.mapper")
+class SpringBootMybatis01ApplicationTests {
+}
+```
+
+**创建对应的mapper.xml**
+
+命名空间要指定
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ljq.mapper.UserMapper">
+
+</mapper>
+```
+
+**配置mapper与mapper.xml的匹配**
+
+type-aliases-package：指定mapper.xml的实体包，如com.ljq.pojo.user=user
+
+```yml
+spring:
+  datasource:
+    username: root
+    password: 666
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mytestdb?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+mybatis:
+  type-aliases-package: com.ljq.pojo
+  mapper-locations: classpath:mybatis/mapper/*.xml
+```
+
+**使用**
+
+```java
+@RestController
+public class UserController {
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @GetMapping("/query")
+    public List<Users> queryUserList(){
+        return userMapper.queryUserList();
+    }
+}
+```
+
