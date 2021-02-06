@@ -435,7 +435,7 @@ public class student {
 
 注：**通过new出来的对象不能@Autowired注释的属性**，因为new出的对象不受spring框架的管理，要使用bean必须通过getBean。**要使用@Autowired注释的属性或对象，必须在spring框架下运行程序**
 
-**Spring测试方法**
+#### **Spring测试方法**
 
 ```java
 @ContextConfiguration(locations = "file:E:\\项目\\study\\spring-02\\src\\main\\resources\\ApplicationConfigure.xml")
