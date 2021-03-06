@@ -69,3 +69,73 @@ html允许嵌套元素
 | \<cite>\</cite>             | <cite>定义引用、引证</cite>           |
 | \<dfn>\</dfn>               | <dfn>定义一个定义项目</dfn>           |
 
+## 5. HTML超链接
+
+html使用\<a>\</a>标签定义超链接
+
+```html
+<a id="bilibili" href="http://www.bilibili.com" target="_blank" rel="noopener noreferrer">点击跳转到哔哩哔哩</a>
+<a href="#bilibili">超链接的超链接</a>
+<a href="http://www.bilibili.com"><img src="/HTML5-01/images/pikaqiu.png" width="500" height="449"/></a>
+```
+
+## 6. 头部head
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <base href="/HTML5-01/images/" />
+    <style type="text/css">
+        body {background-color: beige}
+        p {color: brown}
+    </style>
+    <meta name="keywords" content="HTML">
+    <meta name="description" content="我的第一个网页">
+    <meta name="author" content="ljq">
+    <meta http-equiv="refresh" content="30">
+</head>
+```
+
+| 标签      | 描述                                                         |
+| --------- | ------------------------------------------------------------ |
+| \<base>   | 定义了页面中所有链接默认的根目录                             |
+| \<title>  | 标签定义了页面的标题                                         |
+| \<meta>   | 使用 \<meta> 元素来描述HTML文档的描述，关键词，作者，字符集等。 |
+| \<link>   | 定义了html文档和外部资源之间的关系，常用来链接到样式表       |
+| \<style>  | 定义了样式文件引用地址，也可以直接添加样式渲染HTML文档       |
+| \<script> | 用于加载脚本文件                                             |
+
+## 7. HTML使用CSS
+
+HTML使用样式的方法有三种：
+
+1. 内联样式：使用\<style>标签，当某个元素需要使用特定样式时，也可以使用内联样式
+
+   ```html
+   <p style="color: blue;margin-left: 20px;text-align: center;">使用内联样式的段落</p>
+   ```
+
+2. 内部样式表：在\<head>中使用\<style>元素来指定css
+
+   ```html
+   <!-- 内部样式表可以设置一个默认的样式 -->
+   <head>   
+   	<style type="text/css">
+           body {background-color: beige}
+           p {color: brown}
+       </style>
+   </head>
+   ```
+
+3. 使用外部css文件：需要适配很多页面时，最好使用外部样式表
+
+   ```html
+   <head>
+       <link rel="stylesheet" type="text/css" href="/css/mystyle.css"> 
+   </head>
+   ```
+
+   
