@@ -2,11 +2,11 @@
 
 ## 1. Spring boot项目创建
 
-![image-20210119123828384](Spring boot.assets/image-20210119123828384.png)
+![image-20210119123828384](Spring%20boot.assets/image-20210119123828384-1615170974861.png)
 
 ## 2. spring boot的运行机制
 
-![image-20210119133544011](Spring boot.assets/image-20210119133544011.png)
+![image-20210119133544011](Spring%20boot.assets/image-20210119133544011-1615170977262.png)
 
 ### 2.1 自动装配实现机制
 
@@ -410,7 +410,7 @@ spring:
 
 ### 6.1 项目结构
 
-![image-20210122164124185](Spring boot.assets/image-20210122164124185.png)
+![image-20210122164124185](Spring%20boot.assets/image-20210122164124185-1615170984554.png)
 
 启动器应该和controller在一个包下，才能扫描到controller
 
@@ -418,11 +418,11 @@ spring:
 
 1. 通过webjars目录
 
-   ![image-20210122165345129](Spring boot.assets/image-20210122165345129.png)
+   ![image-20210122165345129](Spring%20boot.assets/image-20210122165345129-1615170990318.png)
 
 2. 静态路径
 
-   ![image-20210122171453033](Spring boot.assets/image-20210122171453033.png)
+   ![image-20210122171453033](Spring%20boot.assets/image-20210122171453033-1615170993599.png)
 
    使用localhost:8080/**.js 会自动去这几个目录下找相应的js文件访问
 
@@ -468,9 +468,9 @@ spring:
 
    将首页放于templates下，通过接口访问
 
-   ![image-20210123154426985](Spring boot.assets/image-20210123154426985.png)
+   ![image-20210123154426985](Spring%20boot.assets/image-20210123154426985-1615170999266.png)
 
-   ![image-20210123154032514](Spring boot.assets/image-20210123154032514.png)
+   ![image-20210123154032514](Spring%20boot.assets/image-20210123154032514-1615170997677.png)
 
 ## 7. spring boot 数据库的使用
 
@@ -604,7 +604,7 @@ public class DruidConfig {
 
 **通过/druid访问后台**
 
-![image-20210124163456349](Spring boot.assets/image-20210124163456349.png)
+![image-20210124163456349](Spring%20boot.assets/image-20210124163456349-1615171003458.png)
 
 ### 7.3 spring-boot整合mybatis
 

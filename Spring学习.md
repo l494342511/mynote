@@ -4,7 +4,7 @@
 
 ### 1.1 创建maven项目
 
-![image-20210113212642686](C:\Users\ljq\AppData\Roaming\Typora\typora-user-images\image-20210113212642686.png)
+![image-20210113212642686](Spring%E5%AD%A6%E4%B9%A0.assets/image-20210113212642686.png)
 
 ### 1.2 在pom中引入依赖
 

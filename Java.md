@@ -4,7 +4,7 @@
 
 ### 1.1 线程的生命周期
 
-<img src="E:\myhub\testgit\java.assets\image-20210127204325958.png" alt="image-20210127204325958" style="zoom:80%;" />
+<img src="Java.assets/image-20210127204325958-1615170945792.png" alt="image-20210127204325958" style="zoom:80%;" />
 
 ### 1.2 线程的状态
 
@@ -151,3 +151,36 @@ public class CallableThreadTest implements Callable<Integer> {
 ```
 
 call方法相当于run方法
+
+## 2. 流stream
+
+### 2.1 利用stream进行排序
+
+| 方法                         | 使用                                           |
+| ---------------------------- | ---------------------------------------------- |
+| list.stream()                | 将list转换为stream                             |
+| .sorted()                    | 对stream进行排序                               |
+| Comparator.comparingInt()    | 比较器，通过对象的get方法进行比较，默认是升序  |
+| .reversed()                  | 将该方法前的stream进行反向排序，即升序变为降序 |
+| thenComparingInt()           | 如果之前比较的属性相等，则再比较，默认是升序   |
+| collect(Collectors.toList()) | 将stream转换为list                             |
+| .map()                       | 只提取排序对象的一个属性，通过get获得          |
+
+**使用例子：**
+
+```java
+student student1 = new student(1,91);
+        student student2 = new student(1,90);
+        student student3 = new student(2,89);
+        List<student> list = new ArrayList<>();
+        list.add(student1);
+        list.add(student2);
+        list.add(student3);
+        list = list.stream()
+        .sorted(Comparator.comparingInt(student::getAge).thenComparingInt(student::getScore).reversed())
+                .collect(Collectors.toList());
+```
+
+如果需要按多个属性降序排列，reversed应该放最后。
+
+reversed是对排序后的list做倒排，并不是对排序顺序做一个规定
