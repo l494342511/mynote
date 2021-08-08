@@ -184,3 +184,34 @@ student student1 = new student(1,91);
 如果需要按多个属性降序排列，reversed应该放最后。
 
 reversed是对排序后的list做倒排，并不是对排序顺序做一个规定
+
+## 2.2 利用流求最大值	
+
+```java
+Arrays.stream(src).flatMapToInt(cur-> IntStream.of(cur.length())).max().orElse(0);
+```
+
+上面代码中，src是一个字符串型数组，flatMapToInt用于将src转换为一个intStream，其操作对象是intStream，因此要用IntStream.of生成intStream
+
+max()是求最大值，返回一个optionalInt；
+
+orElse(0)的作用是如果操作数为null，则返回0；
+
+### 2.2 IntStream()
+
+|                                  |                                    |
+| -------------------------------- | ---------------------------------- |
+| IntStream.rangeClosed(1, n)      | 生成1到n序列的IntStream()          |
+| IntStream.allMatch(lambda表达式) | 所有元素满足lambda表达式则返回true |
+|                                  |                                    |
+
+## 3. 元注解
+
+| 注解            | 描述                                                        |
+| --------------- | ----------------------------------------------------------- |
+| **@Target**     | 此注解用于表示当前注解的使用范围                            |
+| **@Retention**  | 此注解用于表示当前注解的生命周期                            |
+| **@Documented** | 当被此注解所注解时，使用javadoc工具生成文档就会带有注解信息 |
+| **@Inherited**  | 被该注解注解的类被继承时，子类也会继承父类的注解            |
+| **@Repeatable** | 此注解顾名思义是拥有可以重复注解的能力                      |
+
